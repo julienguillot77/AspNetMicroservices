@@ -1,6 +1,9 @@
 version: '3.4'
 
 services:
+  mongoclient:
+    image: mongoclient/mongoclient
+
   portainer:
     image: portainer/portainer-ce
 
@@ -28,13 +31,20 @@ services:
       context: .
       dockerfile: Services/Basket/Basket.API/Dockerfile
 
-  discount.api:
-    image: ${DOCKER_REGISTRY-}discountapi
+  #discount.api:
+  #  image: ${DOCKER_REGISTRY-}discountapi
+  #  build:
+  #    context: .
+  #    dockerfile: Services/Discount/Discount.API/Dockerfile
+
+  discount.grpc:
+    image: ${DOCKER_REGISTRY-}discountgrpc
     build:
       context: .
-      dockerfile: Services/Discount/Discount.API/Dockerfile
+      dockerfile: Services/Discount/Discount.Grpc/Dockerfile
 
 volumes:
+  mongoclient_data:
   mongo_data:
   portainer_data:
   postgres_data:
