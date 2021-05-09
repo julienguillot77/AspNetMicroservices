@@ -12,7 +12,7 @@ namespace Discount.API.Extensions
     {
         public static IHost MigrateDatabase<TContext>(this IHost host, int? retry = 0)
         {
-            int retryForAvailability = retry.GetValueOrDefault(0);
+            int retryForAvailability = retry.GetValueOrDefault();
 
             using var scope = host.Services.CreateScope();
             var services = scope.ServiceProvider;
