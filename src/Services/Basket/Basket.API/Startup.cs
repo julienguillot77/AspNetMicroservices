@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
+using MassTransit;
 
 namespace Basket.API
 {
@@ -28,17 +29,29 @@ namespace Basket.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Basket.API", Version = "v1" });
             });
+
+            // Redis configuration
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = Configuration["CacheSettings:ConnectionString"];
             });
 
-            services.AddScoped<IBasketRepository, BasketRepository>();
-            services.AddAutoMapper(typeof(Startup));
+            // MassTransit-RabbitMQ configuration
+            services.AddMassTransit(o =>
+            {
+                o.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(Configuration["EventBusSettings:HostAddress"]);
+                });
+            });
+            services.AddMassTransitHostedService();
 
-            // Grpc Configuration
+            // Grpc configuration
             services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(o => o.Address = new Uri(Configuration["GrpcSettings:DiscountUrl"]));
             services.AddScoped<DiscountGrpcService>();
+
+            services.AddScoped<IBasketRepository, BasketRepository>();
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -26,9 +26,16 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin1234
     restart: always
     ports:
-        - "5050:80"
+      - "5050:80"
     volumes:
       - pgadmin_data:/root/.pgadmin
+
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
   catalog.db:
     container_name: catalog.db
@@ -55,6 +62,15 @@ services:
         - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+
+  order.db:
+    container_name: order.db
+    environment:
+        SA_PASSWORD: "SwN12345678"
+        ACCEPT_EULA: "Y"
+    restart: always
+    ports:
+      - "1433:1433"
 
   catalog.api:
     container_name: catalog.api
@@ -96,5 +112,19 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "DatabaseSettings__ConnectionString=Server=discount.db;Port=5432;Database=DiscountDb;User Id=admin;Password=admin1234;"
+    depends_on:
+      - discount.db
     ports:
       - "8003:80"
+
+  ordering.api:
+    container_name: ordering.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings__OrderingConnectionString=Server=order.db;Database=OrderDb;User Id=sa;Password=SwN12345678"  
+      - "EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672"
+    depends_on:
+        - order.db
+        #- rabbitmq
+    ports:
+        - "8004:80"

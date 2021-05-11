@@ -56,5 +56,11 @@ namespace Basket.API.Controllers
             await _basketRepository.DeleteBasket(userName);
             return Ok();
         }
+
+
+        //public async Task<IActionResult> Checkout([FromBody] BasketCheckout basket)
+        //{
+
+        //}
     }
 }
